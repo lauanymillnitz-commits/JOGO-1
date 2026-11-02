@@ -19,13 +19,14 @@
         <span class="online-dot"></span>
       </div>
       <div class="nav-label">JOGAR</div>
-      <nav class="main-nav">
-        <button class="nav-item active" data-page="home"><span>⌂</span> Visão geral</button>
-        <button class="nav-item" data-page="collection"><span>▦</span> Minha coleção <i id="collectionNavCount">0</i></button>
-        <button class="nav-item" data-page="capture"><span>◉</span> Capturar</button>
-        <button class="nav-item" data-page="battle"><span>⚔</span> Batalhas</button>
-        <button class="nav-item" data-page="worlds"><span>⌖</span> Regiões</button>
-      </nav>
+<nav class="main-nav">
+  <button class="nav-item active" data-page="home"><span>⌂</span> Visão geral</button>
+  <button class="nav-item" data-page="collection"><span>▦</span> Minha coleção <i id="collectionNavCount">0</i></button>
+  <button class="nav-item" data-page="capture"><span>◉</span> Capturar</button>
+  <button class="nav-item" data-page="battle"><span>⚔</span> Batalhas</button>
+  <button class="nav-item" data-page="worlds"><span>⌖</span> Regiões</button>
+  <button class="nav-item" data-page="events"><span>🎃</span> Eventos <i id="eventsNavBadge" style="background:#f28bbd;color:#fff;display:none">!</i></button>
+</nav>
       <div class="nav-label">PROGRESSO</div>
       <nav class="main-nav">
         <button class="nav-item" data-page="upgrades"><span>↗</span> Melhorias</button>
@@ -91,7 +92,51 @@
       <section class="page" id="page-upgrades"><div class="section-heading"><div><div class="eyebrow">FIQUE MAIS FORTE</div><h2>Melhorias</h2><p class="muted">Invista suas moedas para acelerar sua aventura.</p></div></div><div class="upgrade-grid" id="upgradeGrid"></div></section>
 
       <section class="page" id="page-incubator"><div class="section-heading"><div><div class="eyebrow">SURPRESAS TE ESPERAM</div><h2>Incubadora</h2><p class="muted">Ovos misteriosos podem esconder criaturas extraordinárias.</p></div></div><div class="incubator-layout"><div class="panel incubator-main"><div class="egg-stage"><div class="egg-aura"></div><div class="egg-art" id="eggArt">🥚</div><div class="egg-spark">✦</div></div><h3>Ovo misterioso</h3><p>Um ovo especial com uma criatura aleatória dentro.</p><div class="hatch-progress"><div><span>Incubação</span><b id="eggProgressText">Pronto para começar</b></div><div class="progress-track"><i id="eggProgress"></i></div></div><button class="primary-btn wide" id="eggBtn">Comprar ovo • 350 moedas</button><small class="muted">A abertura acontece imediatamente para manter sua aventura em movimento.</small></div><div class="panel egg-info"><div class="eyebrow">O QUE PODE NASCER?</div><h3>Possibilidades</h3><div class="egg-rarity"><span class="rarity-dot common"></span><b>Comum</b><small>Mais provável</small></div><div class="egg-rarity"><span class="rarity-dot rare"></span><b>Raro</b><small>Menos provável</small></div><div class="egg-rarity"><span class="rarity-dot epic"></span><b>Épico</b><small>Uma surpresa!</small></div><div class="egg-rarity"><span class="rarity-dot legendary"></span><b>Lendário</b><small>Extremamente raro</small></div></div></div></section>
+<section class="page" id="page-events">
+  <div class="section-heading">
+    <div>
+      <div class="eyebrow">EVENTOS SAZONAIS</div>
+      <h2>Eventos especiais</h2>
+      <p class="muted">Pokémon temáticos com 5% de chance em qualquer captura.</p>
+    </div>
+    <div class="collection-count">
+      <b id="eventsCount">0</b>
+      <small>CAPTURADOS EM EVENTO</small>
+    </div>
+  </div>
 
+  <div class="panel event-panel" id="eventActivePanel">
+    <div class="event-hero" id="eventHero">
+      <div class="event-emoji" id="eventEmoji">🎃</div>
+      <div class="event-info">
+        <div class="eyebrow" id="eventStatus">EVENTO ATIVO</div>
+        <h3 id="eventName">Halloween</h3>
+        <p id="eventDesc">Criaturas assustadoras invadiram o jogo!</p>
+        <div class="event-timer">
+          <div class="timer-cell"><b id="eventDays">0</b><small>DIAS</small></div>
+          <div class="timer-sep">:</div>
+          <div class="timer-cell"><b id="eventHours">00</b><small>HORAS</small></div>
+          <div class="timer-sep">:</div>
+          <div class="timer-cell"><b id="eventMins">00</b><small>MIN</small></div>
+          <div class="timer-sep">:</div>
+          <div class="timer-cell"><b id="eventSecs">00</b><small>SEG</small></div>
+        </div>
+      </div>
+    </div>
+    <div class="event-pokemon-list" id="eventPokemonList"></div>
+    <div class="event-odds">
+      <span>✦</span> Cada captura ou ovo tem <b>5%</b> de chance de gerar um Pokémon do evento.
+    </div>
+  </div>
+
+  <div class="section-heading lower-heading">
+    <div>
+      <div class="eyebrow">CALENDÁRIO</div>
+      <h2>Todos os eventos do ano</h2>
+    </div>
+  </div>
+  <div class="world-grid" id="eventCalendarGrid"></div>
+</section>
       <section class="page" id="page-missions"><div class="section-heading"><div><div class="eyebrow">OBJETIVOS DA JORNADA</div><h2>Missões e conquistas</h2><p class="muted">Complete tarefas para ganhar recompensas extras.</p></div></div><div class="mission-list" id="missionList"></div></section>
       <footer class="main-footer">POKÉCLICKER <span>•</span> Sua aventura está apenas começando.</footer>
     </main>
