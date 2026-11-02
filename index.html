@@ -19,17 +19,18 @@
         <span class="online-dot"></span>
       </div>
       <div class="nav-label">JOGAR</div>
-<nav class="main-nav">
-  <button class="nav-item active" data-page="home"><span>⌂</span> Visão geral</button>
-  <button class="nav-item" data-page="collection"><span>▦</span> Minha coleção <i id="collectionNavCount">0</i></button>
-  <button class="nav-item" data-page="capture"><span>◉</span> Capturar</button>
-  <button class="nav-item" data-page="battle"><span>⚔</span> Batalhas</button>
-  <button class="nav-item" data-page="worlds"><span>⌖</span> Regiões</button>
-  <button class="nav-item" data-page="events"><span>🎃</span> Eventos <i id="eventsNavBadge" style="background:#f28bbd;color:#fff;display:none">!</i></button>
-</nav>
+      <nav class="main-nav">
+        <button class="nav-item active" data-page="home"><span>⌂</span> Visão geral</button>
+        <button class="nav-item" data-page="collection"><span>▦</span> Minha coleção <i id="collectionNavCount">0</i></button>
+        <button class="nav-item" data-page="capture"><span>◉</span> Capturar</button>
+        <button class="nav-item" data-page="battle"><span>⚔</span> Batalhas</button>
+        <button class="nav-item" data-page="worlds"><span>⌖</span> Regiões</button>
+        <button class="nav-item" data-page="events"><span>🎃</span> Eventos <i id="eventsNavBadge" style="background:#f28bbd;color:#fff;display:none">!</i></button>
+      </nav>
       <div class="nav-label">PROGRESSO</div>
       <nav class="main-nav">
         <button class="nav-item" data-page="upgrades"><span>↗</span> Melhorias</button>
+        <button class="nav-item" data-page="gemstore"><span>✧</span> Loja de gemas</button>
         <button class="nav-item" data-page="incubator"><span>♢</span> Incubadora</button>
         <button class="nav-item" data-page="missions"><span>⚑</span> Missões</button>
       </nav>
@@ -44,7 +45,7 @@
         <div><div class="eyebrow" id="pageEyebrow">SEU MUNDO, SUA JORNADA</div><h1 id="pageTitle">Visão geral</h1></div>
         <div class="top-stats">
           <div class="currency-pill"><span class="coin">◉</span><div><b id="coins">0</b><small>MOEDAS</small></div><button class="plus-btn" data-goto="upgrades">+</button></div>
-          <div class="currency-pill"><span class="gem">✧</span><div><b id="gems">0</b><small>GEMAS</small></div></div>
+          <div class="currency-pill"><span class="gem">✧</span><div><b id="gems">0</b><small>GEMAS</small></div><button class="plus-btn" data-goto="gemstore" style="background:#7c5cf0">+</button></div>
           <button class="icon-button" id="soundBtn" title="Ativar/desativar sons">♫</button>
         </div>
       </header>
@@ -85,59 +86,161 @@
 
       <section class="page" id="page-capture"><div class="section-heading"><div><div class="eyebrow">ENCONTRE NOVOS AMIGOS</div><h2>Central de capturas</h2><p class="muted">Escolha seu método e veja quem aparece!</p></div></div><div class="capture-layout"><div class="panel capture-main"><div class="capture-visual"><div class="capture-glow"></div><div class="big-ball">◉</div><span class="capture-star star-a">✦</span><span class="capture-star star-b">✧</span></div><h3>Encontro selvagem</h3><p>Use uma Pokébola para encontrar um Pokémon da região atual.</p><div class="capture-cost"><span>◉</span> <b id="ballCost">100</b> moedas por tentativa</div><button class="primary-btn wide" id="captureBtn">Lançar Pokébola <span>→</span></button><small class="chance-note">A sorte pode estar ao seu lado. Pokémon raros são mais difíceis de encontrar!</small></div><div class="panel chance-panel"><div class="panel-head"><div><div class="eyebrow">CHANCES DE ENCONTRO</div><h3>Raridades</h3></div><span>✧</span></div><div id="chanceList"></div><div class="luck-note">✦ Melhorias de sorte aumentam suas chances de encontrar criaturas especiais.</div></div></div><div class="panel result-panel hidden" id="captureResult"></div></section>
 
-      <section class="page" id="page-battle"><div class="section-heading"><div><div class="eyebrow">TESTE SUA EQUIPE</div><h2>Campo de batalha</h2><p class="muted">Enfrente desafios e conquiste recompensas.</p></div></div><div class="panel battle-panel"><div class="battle-top"><span class="tag">ARENA DE TREINAMENTO</span><span class="battle-record" id="battleRecord">Vitórias: 0</span></div><div class="battle-arena"><div class="fighter"><div class="fighter-circle"><img id="battlePlayer" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/1.png"></div><b id="battlePlayerName">Bulbasaur</b><small>SEU PARCEIRO</small><div class="hp-bar"><i id="playerHp"></i></div></div><div class="versus">VS</div><div class="fighter"><div class="fighter-circle enemy"><img id="battleEnemy" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/39.png"></div><b id="battleEnemyName">Jigglypuff</b><small>ADVERSÁRIO</small><div class="hp-bar enemy-hp"><i id="enemyHp"></i></div></div></div><div class="battle-message" id="battleMessage">Seu próximo desafio está esperando. Prepare-se!</div><button class="primary-btn" id="battleBtn">Iniciar batalha <span>⚔</span></button></div><div class="battle-rewards"><div class="reward-tile"><span>◉</span><div><b>Recompensa</b><small>Moedas por vitória</small></div><strong>+250</strong></div><div class="reward-tile"><span>✧</span><div><b>Chance bônus</b><small>Gemas ocasionais</small></div><strong>+1–3</strong></div></div></section>
+      <section class="page" id="page-battle">
+        <div class="section-heading">
+          <div>
+            <div class="eyebrow">TESTE SUA EQUIPE</div>
+            <h2>Campo de batalha</h2>
+            <p class="muted">Escolha a dificuldade, use estratégia e vença.</p>
+          </div>
+          <div class="collection-count">
+            <b id="battleRecord">0</b>
+            <small>VITÓRIAS</small>
+          </div>
+        </div>
+
+        <div class="panel battle-panel">
+          <div class="battle-top">
+            <span class="tag">ARENA DE TREINAMENTO</span>
+            <div class="difficulty-row">
+              <button class="diff-btn active" data-diff="easy">Fácil</button>
+              <button class="diff-btn" data-diff="medium">Médio</button>
+              <button class="diff-btn" data-diff="hard">Difícil</button>
+            </div>
+          </div>
+
+          <div class="battle-arena" id="battleArena">
+            <div class="fighter player-side">
+              <div class="fighter-circle" id="playerCircle">
+                <img id="battlePlayer" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/1.png">
+              </div>
+              <b id="battlePlayerName">Bulbasaur</b>
+              <small id="battlePlayerLvl">NÍVEL 1</small>
+              <div class="hp-bar"><i id="playerHp" style="width:100%"></i></div>
+              <span class="hp-text" id="playerHpText">100 / 100</span>
+            </div>
+            <div class="versus">VS</div>
+            <div class="fighter enemy-side">
+              <div class="fighter-circle enemy" id="enemyCircle">
+                <img id="battleEnemy" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/39.png">
+              </div>
+              <b id="battleEnemyName">Jigglypuff</b>
+              <small id="battleEnemyLvl">NÍVEL 1</small>
+              <div class="hp-bar enemy-hp"><i id="enemyHp" style="width:100%"></i></div>
+              <span class="hp-text" id="enemyHpText">100 / 100</span>
+            </div>
+          </div>
+
+          <div class="battle-log" id="battleLog">
+            <div class="log-line">Seu próximo desafio está esperando. Prepare-se!</div>
+          </div>
+
+          <div class="battle-actions" id="battleActions">
+            <button class="battle-btn attack" id="btnAttack" disabled>⚔ Atacar</button>
+            <button class="battle-btn special" id="btnSpecial" disabled>✦ Especial</button>
+            <button class="battle-btn defend" id="btnDefend" disabled>🛡 Defender</button>
+            <button class="primary-btn" id="battleBtn">Iniciar batalha</button>
+          </div>
+        </div>
+
+        <div class="battle-rewards">
+          <div class="reward-tile"><span>◉</span><div><b>Fácil</b><small>Moedas por vitória</small></div><strong>+150</strong></div>
+          <div class="reward-tile"><span>◉</span><div><b>Médio</b><small>Moedas por vitória</small></div><strong>+300</strong></div>
+          <div class="reward-tile"><span>◉</span><div><b>Difícil</b><small>Moedas por vitória</small></div><strong>+600</strong></div>
+          <div class="reward-tile"><span>✧</span><div><b>Gemas (difícil)</b><small>Chance de bônus</small></div><strong>+1–5</strong></div>
+        </div>
+      </section>
 
       <section class="page" id="page-worlds"><div class="section-heading"><div><div class="eyebrow">EXPLORE O DESCONHECIDO</div><h2>Regiões</h2><p class="muted">Cada região guarda espécies e desafios únicos.</p></div></div><div class="world-grid" id="worldGrid"></div></section>
 
       <section class="page" id="page-upgrades"><div class="section-heading"><div><div class="eyebrow">FIQUE MAIS FORTE</div><h2>Melhorias</h2><p class="muted">Invista suas moedas para acelerar sua aventura.</p></div></div><div class="upgrade-grid" id="upgradeGrid"></div></section>
 
-      <section class="page" id="page-incubator"><div class="section-heading"><div><div class="eyebrow">SURPRESAS TE ESPERAM</div><h2>Incubadora</h2><p class="muted">Ovos misteriosos podem esconder criaturas extraordinárias.</p></div></div><div class="incubator-layout"><div class="panel incubator-main"><div class="egg-stage"><div class="egg-aura"></div><div class="egg-art" id="eggArt">🥚</div><div class="egg-spark">✦</div></div><h3>Ovo misterioso</h3><p>Um ovo especial com uma criatura aleatória dentro.</p><div class="hatch-progress"><div><span>Incubação</span><b id="eggProgressText">Pronto para começar</b></div><div class="progress-track"><i id="eggProgress"></i></div></div><button class="primary-btn wide" id="eggBtn">Comprar ovo • 350 moedas</button><small class="muted">A abertura acontece imediatamente para manter sua aventura em movimento.</small></div><div class="panel egg-info"><div class="eyebrow">O QUE PODE NASCER?</div><h3>Possibilidades</h3><div class="egg-rarity"><span class="rarity-dot common"></span><b>Comum</b><small>Mais provável</small></div><div class="egg-rarity"><span class="rarity-dot rare"></span><b>Raro</b><small>Menos provável</small></div><div class="egg-rarity"><span class="rarity-dot epic"></span><b>Épico</b><small>Uma surpresa!</small></div><div class="egg-rarity"><span class="rarity-dot legendary"></span><b>Lendário</b><small>Extremamente raro</small></div></div></div></section>
-<section class="page" id="page-events">
-  <div class="section-heading">
-    <div>
-      <div class="eyebrow">EVENTOS SAZONAIS</div>
-      <h2>Eventos especiais</h2>
-      <p class="muted">Pokémon temáticos com 5% de chance em qualquer captura.</p>
-    </div>
-    <div class="collection-count">
-      <b id="eventsCount">0</b>
-      <small>CAPTURADOS EM EVENTO</small>
-    </div>
-  </div>
-
-  <div class="panel event-panel" id="eventActivePanel">
-    <div class="event-hero" id="eventHero">
-      <div class="event-emoji" id="eventEmoji">🎃</div>
-      <div class="event-info">
-        <div class="eyebrow" id="eventStatus">EVENTO ATIVO</div>
-        <h3 id="eventName">Halloween</h3>
-        <p id="eventDesc">Criaturas assustadoras invadiram o jogo!</p>
-        <div class="event-timer">
-          <div class="timer-cell"><b id="eventDays">0</b><small>DIAS</small></div>
-          <div class="timer-sep">:</div>
-          <div class="timer-cell"><b id="eventHours">00</b><small>HORAS</small></div>
-          <div class="timer-sep">:</div>
-          <div class="timer-cell"><b id="eventMins">00</b><small>MIN</small></div>
-          <div class="timer-sep">:</div>
-          <div class="timer-cell"><b id="eventSecs">00</b><small>SEG</small></div>
+      <section class="page" id="page-gemstore">
+        <div class="section-heading">
+          <div>
+            <div class="eyebrow">PODER COM GEMAS</div>
+            <h2>Loja de gemas</h2>
+            <p class="muted">Boosters permanentes que turbinam sua jornada.</p>
+          </div>
+          <div class="collection-count">
+            <b id="gemStoreBalance">0</b>
+            <small>GEMAS DISPONÍVEIS</small>
+          </div>
         </div>
-      </div>
-    </div>
-    <div class="event-pokemon-list" id="eventPokemonList"></div>
-    <div class="event-odds">
-      <span>✦</span> Cada captura ou ovo tem <b>5%</b> de chance de gerar um Pokémon do evento.
-    </div>
-  </div>
+        <div class="upgrade-grid" id="gemStoreGrid"></div>
+      </section>
 
-  <div class="section-heading lower-heading">
-    <div>
-      <div class="eyebrow">CALENDÁRIO</div>
-      <h2>Todos os eventos do ano</h2>
-    </div>
-  </div>
-  <div class="world-grid" id="eventCalendarGrid"></div>
-</section>
+      <section class="page" id="page-incubator">
+        <div class="section-heading"><div><div class="eyebrow">SURPRESAS TE ESPERAM</div><h2>Incubadora</h2><p class="muted">Ovos misteriosos podem esconder criaturas extraordinárias.</p></div></div>
+        <div class="incubator-layout">
+          <div class="panel incubator-main">
+            <div class="egg-stage"><div class="egg-aura"></div><div class="egg-art" id="eggArt">🥚</div><div class="egg-spark">✦</div></div>
+            <h3>Ovo misterioso</h3>
+            <p>Um ovo especial com uma criatura aleatória dentro.</p>
+            <div class="hatch-progress"><div><span>Incubação</span><b id="eggProgressText">Pronto para começar</b></div><div class="progress-track"><i id="eggProgress"></i></div></div>
+            <button class="primary-btn wide" id="eggBtn">Comprar ovo • 350 moedas</button>
+            <button class="secondary-btn" id="eggSpeedBtn" style="margin-top:8px;width:100%;max-width:330px">⚡ Acelerar com 1 gema</button>
+            <small class="muted">A abertura acontece imediatamente para manter sua aventura em movimento.</small>
+          </div>
+          <div class="panel egg-info">
+            <div class="eyebrow">O QUE PODE NASCER?</div>
+            <h3>Possibilidades</h3>
+            <div class="egg-rarity"><span class="rarity-dot common"></span><b>Comum</b><small>Mais provável</small></div>
+            <div class="egg-rarity"><span class="rarity-dot rare"></span><b>Raro</b><small>Menos provável</small></div>
+            <div class="egg-rarity"><span class="rarity-dot epic"></span><b>Épico</b><small>Uma surpresa!</small></div>
+            <div class="egg-rarity"><span class="rarity-dot legendary"></span><b>Lendário</b><small>Extremamente raro</small></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="page-events">
+        <div class="section-heading">
+          <div>
+            <div class="eyebrow">EVENTOS SAZONAIS</div>
+            <h2>Eventos especiais</h2>
+            <p class="muted">Pokémon temáticos com 5% de chance em qualquer captura.</p>
+          </div>
+          <div class="collection-count">
+            <b id="eventsCount">0</b>
+            <small>CAPTURADOS EM EVENTO</small>
+          </div>
+        </div>
+
+        <div class="panel event-panel" id="eventActivePanel">
+          <div class="event-hero" id="eventHero">
+            <div class="event-emoji" id="eventEmoji">🎃</div>
+            <div class="event-info">
+              <div class="eyebrow" id="eventStatus">EVENTO ATIVO</div>
+              <h3 id="eventName">Halloween</h3>
+              <p id="eventDesc">Criaturas assustadoras invadiram o jogo!</p>
+              <div class="event-timer">
+                <div class="timer-cell"><b id="eventDays">0</b><small>DIAS</small></div>
+                <div class="timer-sep">:</div>
+                <div class="timer-cell"><b id="eventHours">00</b><small>HORAS</small></div>
+                <div class="timer-sep">:</div>
+                <div class="timer-cell"><b id="eventMins">00</b><small>MIN</small></div>
+                <div class="timer-sep">:</div>
+                <div class="timer-cell"><b id="eventSecs">00</b><small>SEG</small></div>
+              </div>
+            </div>
+          </div>
+          <div class="event-pokemon-list" id="eventPokemonList"></div>
+          <div class="event-odds">
+            <span>✦</span> Cada captura ou ovo tem <b>5%</b> de chance de gerar um Pokémon do evento.
+          </div>
+        </div>
+
+        <div class="section-heading lower-heading">
+          <div>
+            <div class="eyebrow">CALENDÁRIO</div>
+            <h2>Todos os eventos do ano</h2>
+          </div>
+        </div>
+        <div class="world-grid" id="eventCalendarGrid"></div>
+      </section>
+
       <section class="page" id="page-missions"><div class="section-heading"><div><div class="eyebrow">OBJETIVOS DA JORNADA</div><h2>Missões e conquistas</h2><p class="muted">Complete tarefas para ganhar recompensas extras.</p></div></div><div class="mission-list" id="missionList"></div></section>
+
       <footer class="main-footer">POKÉCLICKER <span>•</span> Sua aventura está apenas começando.</footer>
     </main>
   </div>

@@ -95,7 +95,6 @@ const GEM_UPGRADES = [
 ];
 
 /* ===== EVENTOS SAZONAIS ===== */
-/* Datas em MM-DD. O evento roda do start ao end (inclusive). */
 const EVENTS = [
   {
     id:"halloween", name:"Halloween Assombrado", emoji:"🎃",
@@ -164,7 +163,6 @@ const EVENTS = [
   }
 ];
 
-/* Cache para os Pokémon de evento */
 const EVENT_POKEMON_BY_ID = new Map();
 EVENTS.forEach(ev => ev.pokemon.forEach(p => EVENT_POKEMON_BY_ID.set(p.id, p)));
 
@@ -188,7 +186,6 @@ function imageUrl(id){return `https://raw.githubusercontent.com/PokeAPI/sprites/
 function getMon(id){return MON_BY_ID.get(Number(id)) || EVENT_POKEMON_BY_ID.get(Number(id))}
 function countCaught(){return Object.keys(state.caught).length}
 
-/* Fórmulas com gemas */
 function cps(){
   const base = state.autoLevel*2 + Object.values(state.caught).reduce((n,c)=>n+(c.count?Math.max(0,c.count-1)*.5:0),0);
   return base + state.gemCpsLevel*3;
@@ -204,7 +201,7 @@ function format(n){if(n>=1e9)return (n/1e9).toFixed(1)+"B";if(n>=1e6)return (n/1
 function toast(msg,type=""){const el=document.createElement("div");el.className=`toast ${type}`;el.textContent=msg;document.getElementById("toastWrap").append(el);setTimeout(()=>el.remove(),3000)}
 function sound(){if(!soundOn)return;try{const ctx=new(window.AudioContext||window.webkitAudioContext)(),o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.frequency.value=560;o.type="sine";g.gain.setValueAtTime(.05,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.12);o.start();o.stop(ctx.currentTime+.12)}catch{}}
 
-/* ===== LÓGICA DE EVENTOS ===== */
+/* Eventos — lógica */
 function dateToMMDD(d){return (d.getMonth()+1)*100 + d.getDate()}
 function getActiveEvent(){
   const key = dateToMMDD(new Date());
@@ -244,7 +241,7 @@ function isEventPokemon(id){return EVENT_POKEMON_BY_ID.has(Number(id))}
 function eventPokemonList(){const a = getActiveEvent(); return a ? a.event.pokemon : []}
 function eventCatchChance(){return getActiveEvent() ? 0.05 : 0}
 
-/* ===== PÁGINAS ===== */
+/* Páginas */
 function setPage(name){
  document.querySelectorAll(".page").forEach(p=>p.classList.toggle("active",p.id===`page-${name}`));
  document.querySelectorAll(".nav-item").forEach(b=>b.classList.toggle("active",b.dataset.page===name));
@@ -294,7 +291,9 @@ function updateUI(){
  document.getElementById("activeRarity").textContent=active.rarity.toUpperCase();
  document.getElementById("activeRarity").style.color=RARITY[active.rarity].color;
  document.getElementById("clickValue").textContent="+"+format(clickPower());
- document.getElementById("battleRecord").textContent=`Vitórias: ${state.wins}`;
+ // battleRecord agora é só o número
+ const br = document.getElementById("battleRecord");
+ if(br) br.textContent = state.wins;
  document.getElementById("battlePlayer").src=imageUrl(active.id);
  document.getElementById("battlePlayerName").textContent=active.name;
  const opts=Object.keys(state.caught).map(id=>getMon(id)).filter(Boolean);
@@ -551,43 +550,223 @@ document.getElementById("eggSpeedBtn").addEventListener("click",()=>{
  }
 });
 
-/* Batalha */
-function renderBattle(){
- const p=getMon(state.active)||getMon(1);
- const enemies=POKEMON.filter(x=>x.region<=state.world&&x.id!==p.id);
- const e=enemies[Math.floor(Math.random()*enemies.length)]||getMon(39);
- document.getElementById("battleEnemy").src=imageUrl(e.id);
- document.getElementById("battleEnemyName").textContent=e.name;
- document.getElementById("playerHp").style.width="100%";
- document.getElementById("enemyHp").style.width="100%";
- document.getElementById("battleMessage").textContent=`${p.name} está pronto para enfrentar ${e.name}!`;
- document.getElementById("battleBtn").disabled=false;
- document.getElementById("battleBtn").textContent="Iniciar batalha ⚔";
- window.currentEnemy=e;
+/* ===== BATALHA MELHORADA ===== */
+const TYPE_CHART = {
+  "Fogo":{strong:["Planta","Inseto","Gelo","Aço"],weak:["Água","Pedra","Fogo","Dragão"]},
+  "Água":{strong:["Fogo","Terra","Pedra"],weak:["Planta","Água","Dragão"]},
+  "Planta":{strong:["Água","Terra","Pedra"],weak:["Fogo","Planta","Voador","Inseto","Veneno","Dragão","Aço"]},
+  "Elétrico":{strong:["Água","Voador"],weak:["Elétrico","Planta","Terra","Dragão"]},
+  "Inseto":{strong:["Planta","Psíquico","Sombrio"],weak:["Fogo","Voador","Lutador","Fantasma","Aço","Fada"]},
+  "Normal":{strong:[],weak:["Pedra","Aço","Fantasma"]},
+  "Voador":{strong:["Planta","Inseto","Lutador"],weak:["Elétrico","Pedra","Aço"]},
+  "Veneno":{strong:["Planta","Fada"],weak:["Veneno","Terra","Pedra","Fantasma","Aço"]},
+  "Terra":{strong:["Fogo","Elétrico","Veneno","Pedra","Aço"],weak:["Planta","Inseto","Voador"]},
+  "Fada":{strong:["Lutador","Dragão","Sombrio"],weak:["Fogo","Veneno","Aço"]},
+  "Lutador":{strong:["Normal","Pedra","Aço","Gelo","Sombrio"],weak:["Voador","Psíquico","Fada","Fantasma","Veneno"]},
+  "Psíquico":{strong:["Lutador","Veneno"],weak:["Psíquico","Sombrio","Aço"]},
+  "Pedra":{strong:["Fogo","Voador","Inseto","Gelo"],weak:["Lutador","Terra","Aço"]},
+  "Aço":{strong:["Fada","Gelo","Pedra"],weak:["Fogo","Lutador","Terra"]},
+  "Gelo":{strong:["Planta","Voador","Terra","Dragão"],weak:["Fogo","Água","Lutador","Pedra","Aço"]},
+  "Fantasma":{strong:["Psíquico","Fantasma"],weak:["Sombrio","Normal"]},
+  "Dragão":{strong:["Dragão"],weak:["Gelo","Fada","Aço"]},
+  "Sombrio":{strong:["Psíquico","Fantasma"],weak:["Lutador","Fada","Sombrio"]}
+};
+function typeMult(attackerType, defenderType){
+  const a = attackerType.split(" / ")[0].trim();
+  const d = defenderType.split(" / ")[0].trim();
+  const chart = TYPE_CHART[a];
+  if(!chart) return 1;
+  if(chart.strong.includes(d)) return 1.6;
+  if(chart.weak.includes(d)) return 0.6;
+  return 1;
 }
-document.getElementById("battleBtn").addEventListener("click",()=>{
- if(battleBusy)return;battleBusy=true;
- const p=getMon(state.active)||getMon(1),c=state.caught[p.id],e=window.currentEnemy||getMon(39);
- const playerPower=(c.level*2)+(p.base||1)+state.clickLevel+state.gemPowerLevel*10;
- const enemyPower=(e.base||1)+Math.floor(Math.random()*12)+5;
- document.getElementById("battleBtn").disabled=true;
- document.getElementById("battleMessage").textContent=`${p.name} e ${e.name} estão lutando...`;
- document.getElementById("playerHp").style.width=(playerPower>=enemyPower?"100%":"45%");
- document.getElementById("enemyHp").style.width=(playerPower>=enemyPower?"0%":"55%");
- setTimeout(()=>{
-  if(playerPower>=enemyPower){
-   state.wins++;state.coins+=250;
-   const gems=Math.random()<.35?1+Math.floor(Math.random()*3):0;
-   state.gems+=gems;
-   document.getElementById("battleMessage").textContent=`Vitória! ${p.name} venceu! Você ganhou 250 moedas${gems?", e "+gems+" gemas":""}.`;
-   toast("Vitória! +250 moedas","success");
-  }else{
-   document.getElementById("battleMessage").textContent=`${e.name} venceu desta vez. Fortaleça seu parceiro e tente novamente!`;
-   toast("Derrota! Treine seu Pokémon.","error");
+function calcDamage(level, power, attackerPower, defenderPower, attackerType, defenderType){
+  const base = Math.floor((level * 2 + power) * (attackerPower / Math.max(1, defenderPower)) * 0.5 + 3);
+  const mult = typeMult(attackerType, defenderType);
+  const crit = Math.random() < 0.1 ? 1.5 : 1;
+  return Math.max(1, Math.floor(base * mult * crit));
+}
+
+const DIFFICULTIES = {
+  easy:  {label:"Fácil",  hpPlayer:1.0, hpEnemy:0.7, atkEnemy:0.7, rewardCoins:150, rewardGems:[0.05,1,1]},
+  medium:{label:"Médio",  hpPlayer:1.0, hpEnemy:1.0, atkEnemy:1.0, rewardCoins:300, rewardGems:[0.20,1,3]},
+  hard:  {label:"Difícil",hpPlayer:0.9, hpEnemy:1.4, atkEnemy:1.5, rewardCoins:600, rewardGems:[0.45,1,5]}
+};
+
+let currentBattle = null;
+let currentDiff = "easy";
+let battleInProgress = false;
+
+document.querySelectorAll(".diff-btn").forEach(b=>b.addEventListener("click",()=>{
+  if(battleInProgress){ toast("Termine a batalha atual antes de mudar a dificuldade."); return; }
+  currentDiff = b.dataset.diff;
+  document.querySelectorAll(".diff-btn").forEach(x=>x.classList.toggle("active",x===b));
+  renderBattle();
+}));
+
+function battleLog(msg, cls=""){
+  const log = document.getElementById("battleLog");
+  const line = document.createElement("div");
+  line.className = "log-line " + cls;
+  line.textContent = msg;
+  log.appendChild(line);
+  log.scrollTop = log.scrollHeight;
+  while(log.children.length > 30) log.removeChild(log.firstChild);
+}
+
+function renderBattle(){
+  const p = getMon(state.active) || getMon(1);
+  const c = state.caught[p.id] || {level:1};
+  const diff = DIFFICULTIES[currentDiff];
+
+  const pool = POKEMON.filter(x => x.region <= state.world && x.id !== p.id);
+  const e = pool[Math.floor(Math.random()*pool.length)] || getMon(39);
+  const enemyLevel = Math.max(1, c.level + (currentDiff==="easy"?-1:currentDiff==="medium"?0:2));
+
+  const maxHpPlayer = Math.floor((30 + c.level*4 + (p.base||1)*2) * diff.hpPlayer);
+  const maxHpEnemy  = Math.floor((30 + enemyLevel*4 + (e.base||1)*2) * diff.hpEnemy);
+
+  currentBattle = {
+    player: {...p, level:c.level, maxHp:maxHpPlayer, hp:maxHpPlayer, power:p.base||1},
+    enemy:  {...e, level:enemyLevel, maxHp:maxHpEnemy, hp:maxHpEnemy, power:e.base||1, atk:diff.atkEnemy},
+    turn: 0, over:false, defending:false
+  };
+
+  document.getElementById("battlePlayer").src = imageUrl(p.id);
+  document.getElementById("battlePlayerName").textContent = p.name;
+  document.getElementById("battlePlayerLvl").textContent = "NÍVEL " + c.level;
+  document.getElementById("battleEnemy").src = imageUrl(e.id);
+  document.getElementById("battleEnemyName").textContent = e.name;
+  document.getElementById("battleEnemyLvl").textContent = "NÍVEL " + enemyLevel;
+
+  updateHpBars();
+  document.getElementById("battleLog").innerHTML = `<div class="log-line">${p.name} (Nv. ${c.level}) vs ${e.name} (Nv. ${enemyLevel}) — dificuldade ${diff.label}.</div>`;
+  document.getElementById("battleBtn").disabled = false;
+  document.getElementById("battleBtn").textContent = "Iniciar batalha";
+  document.querySelectorAll(".battle-btn").forEach(b=>b.disabled=true);
+}
+
+function updateHpBars(){
+  if(!currentBattle) return;
+  const p = currentBattle.player, e = currentBattle.enemy;
+  document.getElementById("playerHp").style.width = Math.max(0,(p.hp/p.maxHp)*100) + "%";
+  document.getElementById("enemyHp").style.width  = Math.max(0,(e.hp/e.maxHp)*100) + "%";
+  document.getElementById("playerHpText").textContent = `${Math.max(0,p.hp)} / ${p.maxHp}`;
+  document.getElementById("enemyHpText").textContent  = `${Math.max(0,e.hp)} / ${e.maxHp}`;
+}
+
+function startBattle(){
+  if(!currentBattle || battleInProgress) return;
+  battleInProgress = true;
+  document.getElementById("battleBtn").disabled = true;
+  document.querySelectorAll(".battle-btn").forEach(b=>b.disabled=false);
+  battleLog("Batalha iniciada! Escolha uma ação.", "info");
+}
+
+function playerAction(kind){
+  if(!currentBattle || currentBattle.over) return;
+  const p = currentBattle.player, e = currentBattle.enemy;
+  currentBattle.turn++;
+
+  if(kind === "attack"){
+    const dmg = calcDamage(p.level, 10, p.power, e.power, p.type, e.type);
+    e.hp -= dmg;
+    battleLog(`${p.name} usou Ataque! (-${dmg} HP)`, "player");
+    flashHit("enemyCircle"); floatDmg(dmg, "enemy-side");
+  } else if(kind === "special"){
+    const cost = Math.floor(p.maxHp * 0.15);
+    p.hp -= cost;
+    const dmg = calcDamage(p.level, 22, p.power, e.power, p.type, e.type);
+    e.hp -= dmg;
+    battleLog(`${p.name} usou Especial! (-${cost} de custo, -${dmg} no inimigo)`, "player");
+    flashHit("enemyCircle"); floatDmg(dmg, "enemy-side");
+  } else if(kind === "defend"){
+    currentBattle.defending = true;
+    battleLog(`${p.name} está defendendo! (dano reduzido)`, "info");
   }
-  battleBusy=false;checkMissions();updateUI();renderBattle();
- },850);
+
+  updateHpBars();
+  if(e.hp <= 0){ endBattle(true); return; }
+  if(p.hp <= 0){ endBattle(false); return; }
+
+  document.querySelectorAll(".battle-btn").forEach(b=>b.disabled=true);
+  setTimeout(enemyAction, 600);
+}
+
+function enemyAction(){
+  if(!currentBattle || currentBattle.over) return;
+  const p = currentBattle.player, e = currentBattle.enemy;
+  const useSpecial = Math.random() < 0.25;
+  const power = useSpecial ? 18 : 10;
+  let dmg = calcDamage(e.level, power, e.power * e.atk, p.power, e.type, p.type);
+  if(currentBattle.defending){ dmg = Math.floor(dmg * 0.45); currentBattle.defending = false; }
+
+  p.hp -= dmg;
+  battleLog(`${e.name} usou ${useSpecial?"Especial":"Ataque"}! (-${dmg} HP)`, "enemy");
+  flashHit("playerCircle"); floatDmg(dmg, "player-side");
+  updateHpBars();
+
+  if(p.hp <= 0){ endBattle(false); return; }
+  document.querySelectorAll(".battle-btn").forEach(b=>b.disabled=false);
+}
+
+function flashHit(circleId){
+  const el = document.getElementById(circleId);
+  if(!el) return;
+  el.classList.add("hit");
+  setTimeout(()=>el.classList.remove("hit"), 350);
+}
+
+function floatDmg(value, side){
+  const arena = document.getElementById("battleArena");
+  if(!arena) return;
+  const el = document.createElement("span");
+  el.className = "battle-float";
+  el.textContent = "-" + value;
+  el.style.left = side === "enemy-side" ? "72%" : "28%";
+  el.style.top  = "45%";
+  arena.appendChild(el);
+  setTimeout(()=>el.remove(), 900);
+}
+
+function endBattle(won){
+  if(!currentBattle) return;
+  currentBattle.over = true;
+  battleInProgress = false;
+
+  if(won){
+    const diff = DIFFICULTIES[currentDiff];
+    state.wins++;
+    state.coins += diff.rewardCoins;
+    let gems = 0;
+    if(Math.random() < diff.rewardGems[0]){
+      gems = diff.rewardGems[1] + Math.floor(Math.random() * (diff.rewardGems[2] - diff.rewardGems[1] + 1));
+      state.gems += gems;
+    }
+    const cap = state.caught[currentBattle.player.id];
+    if(cap && cap.level < 100 && Math.random() < 0.5) cap.level++;
+    battleLog(`🏆 Vitória! +${diff.rewardCoins} moedas${gems?", +"+gems+" gemas":""}.`, "win");
+    toast(`Vitória! +${diff.rewardCoins} moedas`, "success");
+  } else {
+    battleLog("💀 Derrota... Fortaleça seu parceiro e tente novamente.", "lose");
+    toast("Derrota! Treine seu Pokémon.", "error");
+  }
+
+  document.querySelectorAll(".battle-btn").forEach(b=>b.disabled=true);
+  document.getElementById("battleBtn").disabled = false;
+  document.getElementById("battleBtn").textContent = "Nova batalha";
+  document.getElementById("battleRecord").textContent = state.wins;
+  updateUI();
+}
+
+document.getElementById("battleBtn").addEventListener("click",()=>{
+  if(battleInProgress) return;
+  renderBattle();
+  startBattle();
 });
+document.getElementById("btnAttack").addEventListener("click",()=>playerAction("attack"));
+document.getElementById("btnSpecial").addEventListener("click",()=>playerAction("special"));
+document.getElementById("btnDefend").addEventListener("click",()=>playerAction("defend"));
 
 function missionData(){return [
  {id:"click",icon:"👆",title:"Primeiros passos",desc:"Clique 25 vezes no seu Pokémon parceiro.",progress:Math.min(state.totalClicks,25),goal:25,reward:150},
@@ -659,7 +838,6 @@ function renderEvents(){
     }
   }
 
-  // Calendário
   const key = dateToMMDD(new Date());
   document.getElementById("eventCalendarGrid").innerHTML = EVENTS.map(ev=>{
     const s = ev.start.m*100 + ev.start.d;
@@ -675,7 +853,6 @@ function renderEvents(){
     </article>`;
   }).join("");
 
-  // Contador de eventos + badge
   const evCount = Object.keys(state.caught).filter(id => isEventPokemon(id)).length;
   const el = document.getElementById("eventsCount");
   if(el) el.textContent = evCount;
